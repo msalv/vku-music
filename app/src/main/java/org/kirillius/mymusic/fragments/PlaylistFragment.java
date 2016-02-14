@@ -38,13 +38,13 @@ public class PlaylistFragment extends VKRequestFragment {
     protected ActionBar mActionBar;
 
     private LinearLayoutManager mLayoutManager;
-    private PlaylistAdapter mAdapter;
+    protected PlaylistAdapter mAdapter;
 
-    private View mLoadingView;
-    private ErrorView mErrorView;
+    protected View mLoadingView;
+    protected ErrorView mErrorView;
     protected TextView mEmptyView;
 
-    private final static int ITEMS_COUNT = 10;
+    protected final static int ITEMS_COUNT = 10;
 
     public PlaylistFragment() {
         // Required empty public constructor
