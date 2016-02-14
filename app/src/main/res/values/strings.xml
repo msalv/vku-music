@@ -7,6 +7,12 @@
     <string name="connect_vk">Connect with VK</string>
     <string name="load_more">Load more</string>
     <string name="try_again">Try again</string>
+    <string name="request_error">There was an error during request. Please check network settings and try again</string>
+
+    <plurals name="songs">
+        <item quantity="one">%1$s song</item>
+        <item quantity="other">%1$s songs</item>
+    </plurals>
 
     <string name="music_appear_here">Your music will appear here</string>
 </resources>
