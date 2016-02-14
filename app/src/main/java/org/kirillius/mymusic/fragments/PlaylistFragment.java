@@ -181,7 +181,12 @@ public class PlaylistFragment extends VKRequestFragment {
 
         int total = response.items.getCount();
 
-        mActionBar.setSubtitle( getResources().getQuantityString(R.plurals.songs, total, total) );
+        if ( total > 0 ) {
+            mActionBar.setSubtitle(getResources().getQuantityString(R.plurals.songs, total, total));
+        }
+        else {
+            mActionBar.setSubtitle(R.string.no_songs);
+        }
 
         mAdapter.setItems(response.items);
         mAdapter.setTotalCount(total);
