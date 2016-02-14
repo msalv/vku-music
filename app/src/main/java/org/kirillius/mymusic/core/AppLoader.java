@@ -21,9 +21,9 @@ public class AppLoader extends Application {
         @Override
         public void onVKAccessTokenChanged(VKAccessToken oldToken, VKAccessToken newToken) {
             if (newToken == null) {
-                Intent intent = new Intent("org.kirillius.videocatalog.ACCESS_TOKEN_INVALID");
+                Intent intent = new Intent("org.kirillius.mymusic.ACCESS_TOKEN_INVALID");
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                Log.e("videocatalog", "VKAccessToken is invalid");
+                Log.e("mymusic", "VKAccessToken is invalid");
             }
         }
     };
