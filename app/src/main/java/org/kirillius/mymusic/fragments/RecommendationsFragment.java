@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
@@ -13,6 +14,7 @@ import com.vk.sdk.api.methods.VKApiAudio;
 import com.vk.sdk.api.model.VkAudioArray;
 
 import org.kirillius.mymusic.R;
+import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 
 /**
  * Created by Kirill on 14.02.2016.
@@ -58,7 +60,18 @@ public class RecommendationsFragment extends PlaylistFragment {
 
         mEmptyView.setText(R.string.no_recommendations);
 
-        //todo: use another adapter to render different action button
+        //todo: set another image to action btn
+
+        mAdapter.setOnActionButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                if (mCurrentToast != null ) {
+                    mCurrentToast.cancel();
+                }
+                mCurrentToast = Toast.makeText(itemView.getContext(), "Button works", Toast.LENGTH_SHORT);
+                mCurrentToast.show();
+            }
+        });
 
         return rootView;
     }
