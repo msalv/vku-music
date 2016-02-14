@@ -23,7 +23,7 @@ import org.kirillius.mymusic.core.AppLoader;
 import org.kirillius.mymusic.fragments.LoginFragment;
 import org.kirillius.mymusic.fragments.PlaylistFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnFragmentRequested {
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -119,9 +119,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        int stacked = getSupportFragmentManager().getBackStackEntryCount();
+        int stacked = getFragmentManager().getBackStackEntryCount();
         if ( stacked > 0 ) {
-            getSupportFragmentManager().popBackStack();
+            getFragmentManager().popBackStack();
 
             if (stacked == 1) {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -165,4 +165,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    public void navigate(Fragment fragment, String tag) {
+        showFragment(fragment, tag, true);
+    }
 }

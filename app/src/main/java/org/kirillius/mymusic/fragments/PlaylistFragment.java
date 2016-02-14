@@ -1,5 +1,7 @@
 package org.kirillius.mymusic.fragments;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -18,12 +20,10 @@ import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.methods.VKApiAudio;
 import com.vk.sdk.api.model.VKApiGetAudioResponse;
-import com.vk.sdk.api.model.VKApiUserFull;
-import com.vk.sdk.api.model.VKList;
 import com.vk.sdk.api.model.VkAudioArray;
 
+import org.kirillius.mymusic.OnFragmentRequested;
 import org.kirillius.mymusic.R;
-import org.kirillius.mymusic.core.AndroidUtils;
 import org.kirillius.mymusic.ui.ErrorView;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 import org.kirillius.mymusic.ui.adapters.PlaylistAdapter;
@@ -44,12 +44,15 @@ public class PlaylistFragment extends VKRequestFragment {
     protected ErrorView mErrorView;
     protected TextView mEmptyView;
 
-    protected final static int ITEMS_COUNT = 10;
+    protected final static int ITEMS_COUNT = 30;
+
+    private StringBuilder mStringBuilder;
+
+    private OnFragmentRequested onFragmentRequested;
 
     public PlaylistFragment() {
-        // Required empty public constructor
+        mStringBuilder = new StringBuilder();
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,6 +63,7 @@ public class PlaylistFragment extends VKRequestFragment {
 
         mActionBar.setTitle(R.string.app_name);
         mActionBar.setSubtitle(null);
+        mActionBar.setDisplayHomeAsUpEnabled(false);
 
         mLoadingView = rootView.findViewById(R.id.loading_view);
         mErrorView = (ErrorView)rootView.findViewById(R.id.error_view);
@@ -124,6 +128,24 @@ public class PlaylistFragment extends VKRequestFragment {
 
                 int visibility = buttons.getVisibility() == View.GONE ? View.VISIBLE : View.GONE;
                 buttons.setVisibility(visibility);
+            }
+        });
+
+        mAdapter.setOnActionButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                com.vk.sdk.api.model.VKApiAudio track = mAdapter.getItem(position);
+
+                if (track == null) {
+                    return;
+                }
+
+                mStringBuilder.setLength(0);
+                mStringBuilder.append(track.owner_id).append("_").append(track.id);
+
+                String song_id = mStringBuilder.toString();
+                RecommendationsFragment f = RecommendationsFragment.createInstance(song_id, track.title);
+                onFragmentRequested.navigate(f, RecommendationsFragment.TAG);
             }
         });
 
@@ -238,6 +260,24 @@ public class PlaylistFragment extends VKRequestFragment {
         mCurrentRequest = null;
 
         mAdapter.addItems(items);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = getActivity();
+        if ( activity instanceof OnFragmentRequested ) {
+            onFragmentRequested = (OnFragmentRequested)activity;
+        }
+        else {
+            throw new RuntimeException(context.toString() + " must implement OnFragmentRequested");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        onFragmentRequested = null;
     }
 
     @Override
