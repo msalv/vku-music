@@ -6,5 +6,7 @@
 
     <string name="connect_vk">Connect with VK</string>
     <string name="load_more">Load more</string>
+    <string name="try_again">Try again</string>
+
     <string name="music_appear_here">Your music will appear here</string>
 </resources>
