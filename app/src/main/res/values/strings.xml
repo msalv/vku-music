@@ -3,4 +3,6 @@
 
     <integer name="com_vk_sdk_AppId">5294559</integer>
     <string name="com_vk_sdk_ApiVersion">5.44</string>
+
+    <string name="connect_vk">Connect with VK</string>
 </resources>
