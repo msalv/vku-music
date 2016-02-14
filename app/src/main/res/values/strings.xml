@@ -9,6 +9,8 @@
     <string name="try_again">Try again</string>
     <string name="request_error">There was an error during request. Please check network settings and try again</string>
 
+    <string name="no_songs">No songs</string>
+
     <plurals name="songs">
         <item quantity="one">%1$s song</item>
         <item quantity="other">%1$s songs</item>
