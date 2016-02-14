@@ -51,7 +51,6 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="48dp"
-            android:adjustViewBounds="true"
             android:tint="@color/colorAccent"
             android:src="@drawable/ic_play_arrow_black_24dp"/>
 
