@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">My Music</string>
+
+    <integer name="com_vk_sdk_AppId">5294559</integer>
+    <string name="com_vk_sdk_ApiVersion">5.44</string>
+
+    <string name="connect_vk">Connect with VK</string>
+    <string name="load_more">Load more</string>
+    <string name="try_again">Try again</string>
+    <string name="request_error">There was an error during request. Please check network settings and try again</string>
+
+    <string name="no_songs">No songs</string>
+
+    <plurals name="songs">
+        <item quantity="one">%1$s song</item>
+        <item quantity="other">%1$s songs</item>
+    </plurals>
+
+    <string name="music_appear_here">Your music will appear here</string>
+    <string name="no_recommendations">There are no recommendations for you this time</string>
+    <string name="recommendations">Recommendations</string>
+    <string name="track_saved">Track saved</string>
+</resources>
