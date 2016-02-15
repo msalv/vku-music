@@ -19,4 +19,5 @@
     <string name="music_appear_here">Ваша музыка будет отображаться здесь</string>
     <string name="no_recommendations">На эту песню ничто не похоже</string>
     <string name="recommendations">Рекомендации</string>
+    <string name="track_saved">Песня сохранена</string>
 </resources>
