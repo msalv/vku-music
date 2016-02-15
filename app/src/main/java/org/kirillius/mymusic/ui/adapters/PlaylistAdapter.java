@@ -55,6 +55,8 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             VKApiAudio track = getItem(position);
 
+            vh.buttons_container.setVisibility(View.GONE);
+
             vh.artist.setText(track.artist);
             vh.track.setText(track.title);
 
@@ -70,6 +72,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         public TextView artist;
         public TextView track;
         public TextView duration;
+        public View buttons_container;
 
         public ImageButton action;
 
@@ -80,6 +83,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
             track = (TextView) itemView.findViewById(R.id.track);
             duration = (TextView) itemView.findViewById(R.id.duration);
 
+            buttons_container = itemView.findViewById(R.id.buttons);
             action = (ImageButton) itemView.findViewById(R.id.action);
 
             if ( onAction != null ) {
