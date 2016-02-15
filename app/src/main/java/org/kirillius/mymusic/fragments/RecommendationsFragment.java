@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
@@ -60,20 +61,47 @@ public class RecommendationsFragment extends PlaylistFragment {
 
         mEmptyView.setText(R.string.no_recommendations);
 
-        mAdapter.setItemLayoutId(R.layout.audio_recommnded_item);
-
         mAdapter.setOnActionButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                if (mCurrentToast != null ) {
-                    mCurrentToast.cancel();
-                }
-                mCurrentToast = Toast.makeText(itemView.getContext(), "Button works", Toast.LENGTH_SHORT);
-                mCurrentToast.show();
+                saveTrack(position);
             }
         });
 
         return rootView;
+    }
+
+    /**
+     * Adds a track to the user's playlist
+     * @param position
+     */
+    private void saveTrack(final int position) {
+        final com.vk.sdk.api.model.VKApiAudio item = mAdapter.getItem(position);
+
+        mCurrentRequest = new VKApiAudio().add(VKParameters.from(
+            "audio_id", item.id,
+            "owner_id", item.owner_id
+        ));
+
+        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override
+            public void onComplete(VKResponse response) {
+
+                item.owner_id = Integer.valueOf(VKAccessToken.currentToken().userId);
+                mAdapter.notifyItemChanged(position);
+
+                if (mCurrentToast != null) {
+                    mCurrentToast.cancel();
+                }
+                mCurrentToast = Toast.makeText(getActivity(), R.string.track_saved, Toast.LENGTH_SHORT);
+                mCurrentToast.show();
+            }
+
+            @Override
+            public void onError(VKError error) {
+                showError(error);
+            }
+        });
     }
 
     @Override
