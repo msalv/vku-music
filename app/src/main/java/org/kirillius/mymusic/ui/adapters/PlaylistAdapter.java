@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.vk.sdk.api.model.VKApiAudio;
@@ -18,8 +19,15 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
     private StringBuilder mStringBuilder;
 
+    private OnItemClickListener onActionButtonClicked;
+    public int currentItemId = -1;
+
     public PlaylistAdapter() {
         mStringBuilder = new StringBuilder();
+    }
+
+    public void setOnActionButtonClicked(OnItemClickListener onActionButtonClicked) {
+        this.onActionButtonClicked = onActionButtonClicked;
     }
 
     @Override
@@ -30,7 +38,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         switch (viewType) {
             case ITEM_VIEW_TYPE:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.audio_item, parent, false);
-                holder = new ItemHolder(view, this.clickListener);
+                holder = new ItemHolder(view, this.clickListener, this.onActionButtonClicked);
                 break;
 
             default:
@@ -48,6 +56,13 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             VKApiAudio track = getItem(position);
 
+            if ( position == currentItemId ) {
+                vh.buttons_container.setVisibility(View.VISIBLE);
+            }
+            else {
+                vh.buttons_container.setVisibility(View.GONE);
+            }
+
             vh.artist.setText(track.artist);
             vh.track.setText(track.title);
 
@@ -64,12 +79,28 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         public TextView track;
         public TextView duration;
 
-        public ItemHolder(View itemView, OnItemClickListener clickListener) {
+        public View buttons_container;
+        public ImageButton action;
+
+        public ItemHolder(View itemView, OnItemClickListener clickListener, final OnItemClickListener onAction) {
             super(itemView, clickListener);
 
             artist = (TextView) itemView.findViewById(R.id.artist);
             track = (TextView) itemView.findViewById(R.id.track);
             duration = (TextView) itemView.findViewById(R.id.duration);
+
+            buttons_container = itemView.findViewById(R.id.buttons);
+
+            action = (ImageButton)itemView.findViewById(R.id.action);
+
+            if ( onAction != null ) {
+                action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onAction.onItemClick(v, getLayoutPosition());
+                    }
+                });
+            }
         }
     }
 }
