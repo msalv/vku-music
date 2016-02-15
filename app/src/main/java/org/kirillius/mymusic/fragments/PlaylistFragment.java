@@ -74,7 +74,7 @@ public class PlaylistFragment extends VKRequestFragment {
         mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new PlaylistAdapter();
+        mAdapter = AdapterFactory.create(this);
 
         recyclerView.setAdapter(mAdapter);
 
