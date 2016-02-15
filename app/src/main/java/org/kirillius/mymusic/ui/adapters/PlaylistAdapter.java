@@ -80,6 +80,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         public TextView duration;
 
         public View buttons_container;
+        public ImageButton action;
 
         public ItemHolder(View itemView, OnItemClickListener clickListener, final OnItemClickListener onAction) {
             super(itemView, clickListener);
@@ -90,7 +91,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             buttons_container = itemView.findViewById(R.id.buttons);
 
-            View action = itemView.findViewById(R.id.action);
+            action = (ImageButton)itemView.findViewById(R.id.action);
 
             if ( onAction != null ) {
                 action.setOnClickListener(new View.OnClickListener() {
