@@ -17,6 +17,6 @@
     </plurals>
 
     <string name="music_appear_here">Your music will appear here</string>
-    <string name="no_recommendations">There is no recommendations for you this time</string>
+    <string name="no_recommendations">There are no recommendations for you this time</string>
     <string name="recommendations">Recommendations</string>
 </resources>
