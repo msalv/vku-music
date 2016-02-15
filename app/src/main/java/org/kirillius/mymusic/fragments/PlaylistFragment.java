@@ -25,6 +25,7 @@ import com.vk.sdk.api.model.VkAudioArray;
 import org.kirillius.mymusic.OnFragmentRequested;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.ui.ErrorView;
+import org.kirillius.mymusic.ui.adapters.AdapterFactory;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 import org.kirillius.mymusic.ui.adapters.PlaylistAdapter;
 
@@ -124,10 +125,13 @@ public class PlaylistFragment extends VKRequestFragment {
         mAdapter.setOnItemClickListener(new EndlessScrollAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                View buttons = itemView.findViewById(R.id.buttons);
+                int prev = mAdapter.currentItemId;
+                mAdapter.currentItemId = (prev == position) ? -1 : position;
 
-                int visibility = buttons.getVisibility() == View.GONE ? View.VISIBLE : View.GONE;
-                buttons.setVisibility(visibility);
+                mAdapter.notifyItemChanged(position);
+                if (prev != -1) {
+                    mAdapter.notifyItemChanged(prev);
+                }
             }
         });
 
