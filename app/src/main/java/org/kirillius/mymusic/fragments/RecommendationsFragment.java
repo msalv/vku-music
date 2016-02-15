@@ -60,7 +60,7 @@ public class RecommendationsFragment extends PlaylistFragment {
 
         mEmptyView.setText(R.string.no_recommendations);
 
-        //todo: set another image to action btn
+        mAdapter.setItemLayoutId(R.layout.audio_recommnded_item);
 
         mAdapter.setOnActionButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
             @Override

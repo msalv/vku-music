@@ -17,6 +17,7 @@ import org.kirillius.mymusic.core.DurationFormatter;
  */
 public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
+    private int itemLayoutId = R.layout.audio_item;
     private StringBuilder mStringBuilder;
 
     private OnItemClickListener onActionButtonClicked;
@@ -29,6 +30,10 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         this.onActionButtonClicked = onActionButtonClicked;
     }
 
+    public void setItemLayoutId(int itemLayoutId) {
+        this.itemLayoutId = itemLayoutId;
+    }
+
     @Override
     public EndlessScrollAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
@@ -36,7 +41,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
         switch (viewType) {
             case ITEM_VIEW_TYPE:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.audio_item, parent, false);
+                view = LayoutInflater.from(parent.getContext()).inflate(itemLayoutId, parent, false);
                 holder = new ItemHolder(view, this.clickListener, this.onActionButtonClicked);
                 break;
 
