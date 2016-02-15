@@ -20,6 +20,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
     private StringBuilder mStringBuilder;
 
     private OnItemClickListener onActionButtonClicked;
+    public int currentItemId = -1;
 
     public PlaylistAdapter() {
         mStringBuilder = new StringBuilder();
@@ -55,7 +56,12 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             VKApiAudio track = getItem(position);
 
-            vh.buttons_container.setVisibility(View.GONE);
+            if ( position == currentItemId ) {
+                vh.buttons_container.setVisibility(View.VISIBLE);
+            }
+            else {
+                vh.buttons_container.setVisibility(View.GONE);
+            }
 
             vh.artist.setText(track.artist);
             vh.track.setText(track.title);
