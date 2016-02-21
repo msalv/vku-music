@@ -160,7 +160,7 @@ public class PlaylistFragment extends VKRequestFragment {
             public void onItemClick(View itemView, int position) {
                 Intent intent = new Intent(getActivity(), PlayerService.class);
 
-                intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, mAdapter.getItems());
+                intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, mAdapter.toArrayList());
                 intent.putExtra(PlayerService.EXTRA_POSITION, position);
                 intent.putExtra(PlayerService.EXTRA_TOTAL, mAdapter.getTotalCount());
 

@@ -29,8 +29,8 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         mStringBuilder = new StringBuilder();
     }
 
-    public ArrayList<VKApiAudio> getItems() {
-        return (ArrayList<VKApiAudio>)mItems;
+    public ArrayList<VKApiAudio> toArrayList() {
+        return new ArrayList<>(mItems);
     }
 
     public void setOnActionButtonClicked(OnItemClickListener onActionButtonClicked) {
