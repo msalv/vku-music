@@ -81,9 +81,8 @@ public class PlayerService extends Service {
         contentView.setTextViewText(R.id.artist, track.artist);
         contentView.setTextViewText(R.id.track, track.title);
 
-        if (mIsPlaying) {
-            contentView.setImageViewResource(R.id.play, R.drawable.ic_pause_black_24dp);
-        }
+        int resId = mIsPlaying ? R.drawable.ic_pause_black_24dp : R.drawable.ic_play_arrow_black_24dp;
+        contentView.setImageViewResource(R.id.play, resId);
 
         contentView.setOnClickPendingIntent(R.id.prev, PendingIntent.getBroadcast(this, 0, new Intent(ACTION_PREV), 0));
         contentView.setOnClickPendingIntent(R.id.play, PendingIntent.getBroadcast(this, 0, new Intent(ACTION_PLAY_PAUSE), 0));
