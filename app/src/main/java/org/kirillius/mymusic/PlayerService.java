@@ -84,6 +84,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
      */
     private void playTrack() {
 
+        if ( mCurrentPosition >= mTracks.size() ) {
+            return;
+        }
+
         VKApiAudio track = mTracks.get(mCurrentPosition);
 
         mMediaPlayer = new MediaPlayer();
@@ -129,6 +133,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
      * Updates the notification
      */
     private void updateNotification() {
+        if ( mCurrentPosition >= mTracks.size() ) {
+            return;
+        }
+
         VKApiAudio track = mTracks.get(mCurrentPosition);
 
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.service_player);
