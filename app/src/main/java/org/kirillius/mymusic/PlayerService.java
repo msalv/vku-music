@@ -18,6 +18,8 @@ import android.widget.RemoteViews;
 
 import com.vk.sdk.api.model.VKApiAudio;
 
+import org.kirillius.mymusic.fragments.PlaylistFragment;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -36,6 +38,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_CLOSE = "org.kirillius.mymusic.ActionClose";
 
     public static final int NOTIFICATION_ID = 1;
+    public static final String TRACK_ID = "TrackId";
 
     private ArrayList<VKApiAudio> mTracks = new ArrayList<>();
     private int mCurrentPosition = 0;
@@ -97,11 +100,37 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         if ( mMediaPlayer != null ) {
             if ( isPlaying() ) {
                 mMediaPlayer.pause();
+                sendPauseBroadcast();
             }
             else {
                 mMediaPlayer.start();
+                sendResumeBroadcast();
             }
         }
+    }
+
+    /**
+     * Notifies listeners about pausing the music
+     */
+    private void sendPauseBroadcast() {
+        Intent intent = new Intent(PlaylistFragment.BROADCAST_ACTION);
+        intent.putExtra(TRACK_ID, -1);
+
+        sendBroadcast(intent);
+    }
+
+    /**
+     * Notifies about resuming the playback
+     */
+    private void sendResumeBroadcast() {
+        if ( mCurrentPosition >= mTracks.size() ) {
+            return;
+        }
+
+        Intent intent = new Intent(PlaylistFragment.BROADCAST_ACTION);
+        intent.putExtra(TRACK_ID, mTracks.get(mCurrentPosition).id);
+
+        sendBroadcast(intent);
     }
 
     /**
@@ -196,6 +225,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public void onPrepared(MediaPlayer mp) {
         mp.start();
         updateNotification();
+
+        sendResumeBroadcast();
     }
 
     /**
@@ -250,6 +281,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 PlayerService.this.playNext();
             }
             else if ( PlayerService.ACTION_CLOSE.equals(action) ) {
+                PlayerService.this.sendPauseBroadcast();
                 PlayerService.this.stopForeground(true);
                 PlayerService.this.stopSelf();
             }
