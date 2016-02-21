@@ -16,6 +16,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.model.VKApiAudio;
 
 import org.kirillius.mymusic.fragments.PlaylistFragment;
@@ -43,6 +44,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private ArrayList<VKApiAudio> mTracks = new ArrayList<>();
     private int mCurrentPosition = 0;
     private int mTotalCount = 0;
+    private int mCurrentTrackId = -1;
 
     private MediaPlayer mMediaPlayer;
     private PlayerBroadcastReceiver mReceiver;
@@ -66,8 +68,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         registerReceiver(mReceiver, intentFilter);
 
-        if ( !isPlaying() ) {
+        if ( mTracks.get(mCurrentPosition).id != mCurrentTrackId ) {
             playTrack();
+        }
+        else {
+            togglePlayer();
         }
 
         // show notification
@@ -178,15 +183,21 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             return;
         }
 
+        releaseMediaPlayer();
+
         VKApiAudio track = mTracks.get(mCurrentPosition);
 
+        mCurrentTrackId = track.id;
+
         mMediaPlayer = new MediaPlayer();
+
         try {
             mMediaPlayer.setDataSource(track.url);
         }
         catch (IOException e) {
             Log.e("mymusic", e.getMessage());
         }
+
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.prepareAsync();
