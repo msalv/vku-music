@@ -331,8 +331,10 @@ public class PlaylistFragment extends VKRequestFragment {
         public void onReceive(Context context, Intent intent) {
             int track_id = intent.getIntExtra(PlayerService.TRACK_ID, -1);
 
-            mAdapter.currentPlayingId = track_id;
-            mAdapter.notifyDataSetChanged();
+            if ( mAdapter != null ) {
+                mAdapter.currentPlayingId = track_id;
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 }
