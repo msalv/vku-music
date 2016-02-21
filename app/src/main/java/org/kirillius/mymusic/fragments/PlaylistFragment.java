@@ -2,6 +2,7 @@ package org.kirillius.mymusic.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -23,6 +24,7 @@ import com.vk.sdk.api.model.VKApiGetAudioResponse;
 import com.vk.sdk.api.model.VkAudioArray;
 
 import org.kirillius.mymusic.OnFragmentRequested;
+import org.kirillius.mymusic.PlayerService;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.ui.ErrorView;
 import org.kirillius.mymusic.ui.adapters.AdapterFactory;
@@ -150,6 +152,19 @@ public class PlaylistFragment extends VKRequestFragment {
                 String song_id = mStringBuilder.toString();
                 RecommendationsFragment f = RecommendationsFragment.createInstance(song_id, track.title);
                 onFragmentRequested.navigate(f, RecommendationsFragment.TAG);
+            }
+        });
+
+        mAdapter.setOnPlayButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                Intent intent = new Intent(getActivity(), PlayerService.class);
+
+                intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, mAdapter.getItems());
+                intent.putExtra(PlayerService.EXTRA_POSITION, position);
+                intent.putExtra(PlayerService.EXTRA_TOTAL, mAdapter.getTotalCount());
+
+                getActivity().startService(intent);
             }
         });
 

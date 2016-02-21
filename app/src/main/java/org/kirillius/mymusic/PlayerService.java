@@ -10,6 +10,10 @@ import android.support.annotation.Nullable;
  */
 public class PlayerService extends Service {
 
+    public static final String EXTRA_TRACKS = "ExtraTracks";
+    public static final String EXTRA_POSITION = "ExtraPosition";
+    public static final String EXTRA_TOTAL = "ExtraTotal";
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
