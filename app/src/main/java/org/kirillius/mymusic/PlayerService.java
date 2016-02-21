@@ -80,31 +80,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     /**
-     * Prepares current track for playing asynchronously
-     */
-    private void playTrack() {
-
-        if ( mCurrentPosition >= mTracks.size() ) {
-            return;
-        }
-
-        VKApiAudio track = mTracks.get(mCurrentPosition);
-
-        mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setDataSource(track.url);
-        }
-        catch (IOException e) {
-            Log.e("mymusic", e.getMessage());
-        }
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.prepareAsync();
-
-        mMediaPlayer.setOnCompletionListener(this);
-    }
-
-    /**
      * Checks whether music is playing or not
      * @return boolean
      */
@@ -166,13 +141,28 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     /**
-     * Releases the media player
+     * Prepares current track for playing asynchronously
      */
-    private void releaseMediaPlayer() {
-        if ( mMediaPlayer != null ) {
-            mMediaPlayer.release();
+    private void playTrack() {
+
+        if ( mCurrentPosition >= mTracks.size() ) {
+            return;
         }
-        mMediaPlayer = null;
+
+        VKApiAudio track = mTracks.get(mCurrentPosition);
+
+        mMediaPlayer = new MediaPlayer();
+        try {
+            mMediaPlayer.setDataSource(track.url);
+        }
+        catch (IOException e) {
+            Log.e("mymusic", e.getMessage());
+        }
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.prepareAsync();
+
+        mMediaPlayer.setOnCompletionListener(this);
     }
 
     @Override
@@ -186,6 +176,16 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    /**
+     * Releases the media player
+     */
+    private void releaseMediaPlayer() {
+        if ( mMediaPlayer != null ) {
+            mMediaPlayer.release();
+        }
+        mMediaPlayer = null;
     }
 
     /**
