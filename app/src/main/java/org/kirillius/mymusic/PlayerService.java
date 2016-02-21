@@ -79,6 +79,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mReceiver = new PlayerBroadcastReceiver();
     }
 
+    /**
+     * Prepares current track for playing asynchronously
+     */
     private void playTrack() {
 
         VKApiAudio track = mTracks.get(mCurrentPosition);
@@ -97,6 +100,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mMediaPlayer.setOnCompletionListener(this);
     }
 
+    /**
+     * Checks whether music is playing or not
+     * @return boolean
+     */
     private boolean isPlaying() {
         if ( mMediaPlayer != null ) {
             return mMediaPlayer.isPlaying();
@@ -104,6 +111,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return false;
     }
 
+    /**
+     * Pauses/resumes playback
+     */
     private void togglePlayer() {
         if ( mMediaPlayer != null ) {
             if ( isPlaying() ) {
@@ -147,6 +157,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         startForeground(NOTIFICATION_ID, notification);
     }
 
+    /**
+     * Releases the media player
+     */
     private void releaseMediaPlayer() {
         if ( mMediaPlayer != null ) {
             mMediaPlayer.release();
@@ -167,17 +180,28 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return null;
     }
 
+    /**
+     * Starts playing when track was downloaded
+     * @param mp
+     */
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
         updateNotification();
     }
 
+    /**
+     * Switches to the next track when previous was done playing
+     * @param mp
+     */
     @Override
     public void onCompletion(MediaPlayer mp) {
         playNext();
     }
 
+    /**
+     * Switches to the previous track
+     */
     private void playPrev() {
         mCurrentPosition = --mCurrentPosition < 0 ? mTracks.size() - 1 : mCurrentPosition;
         if ( mMediaPlayer != null ) {
@@ -188,6 +212,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         updateNotification();
     }
 
+    /**
+     * Switches to the next track
+     */
     private void playNext() {
         mCurrentPosition = ++mCurrentPosition % mTracks.size();
         if ( mMediaPlayer != null ) {
