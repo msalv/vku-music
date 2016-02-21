@@ -1,7 +1,10 @@
 package org.kirillius.mymusic.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -23,6 +26,7 @@ import com.vk.sdk.api.model.VKApiGetAudioResponse;
 import com.vk.sdk.api.model.VkAudioArray;
 
 import org.kirillius.mymusic.OnFragmentRequested;
+import org.kirillius.mymusic.PlayerService;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.ui.ErrorView;
 import org.kirillius.mymusic.ui.adapters.AdapterFactory;
@@ -35,6 +39,7 @@ import org.kirillius.mymusic.ui.adapters.PlaylistAdapter;
 public class PlaylistFragment extends VKRequestFragment {
 
     public final static String TAG = "PlaylistFragment";
+    public static final String BROADCAST_ACTION = "org.kirillius.mymusic.PLAYLIST_BROADCAST_ACTION";
 
     protected ActionBar mActionBar;
 
@@ -48,6 +53,7 @@ public class PlaylistFragment extends VKRequestFragment {
     protected final static int ITEMS_COUNT = 30;
 
     private StringBuilder mStringBuilder;
+    private PlaylistBroadcastReceiver mReceiver;
 
     private OnFragmentRequested onFragmentRequested;
 
@@ -152,6 +158,22 @@ public class PlaylistFragment extends VKRequestFragment {
                 onFragmentRequested.navigate(f, RecommendationsFragment.TAG);
             }
         });
+
+        mAdapter.setOnPlayButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                Intent intent = new Intent(getActivity(), PlayerService.class);
+
+                intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, mAdapter.toArrayList());
+                intent.putExtra(PlayerService.EXTRA_POSITION, position);
+                intent.putExtra(PlayerService.EXTRA_TOTAL, mAdapter.getTotalCount());
+
+                getActivity().startService(intent);
+            }
+        });
+
+        mReceiver = new PlaylistBroadcastReceiver();
+        getActivity().registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
 
         loadTracks();
 
@@ -295,5 +317,24 @@ public class PlaylistFragment extends VKRequestFragment {
         mEmptyView = null;
 
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(mReceiver);
+    }
+
+    private class PlaylistBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int track_id = intent.getIntExtra(PlayerService.TRACK_ID, -1);
+
+            if ( mAdapter != null ) {
+                mAdapter.currentPlayingId = track_id;
+                mAdapter.notifyDataSetChanged();
+            }
+        }
     }
 }
