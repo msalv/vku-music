@@ -12,6 +12,8 @@ import com.vk.sdk.api.model.VKApiAudio;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.core.DurationFormatter;
 
+import java.util.ArrayList;
+
 /**
  * Created by Kirill on 14.02.2016.
  */
@@ -25,6 +27,10 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
     public PlaylistAdapter() {
         mStringBuilder = new StringBuilder();
+    }
+
+    public ArrayList<VKApiAudio> getItems() {
+        return (ArrayList<VKApiAudio>)mItems;
     }
 
     public void setOnActionButtonClicked(OnItemClickListener onActionButtonClicked) {
