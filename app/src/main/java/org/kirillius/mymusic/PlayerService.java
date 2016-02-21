@@ -16,12 +16,17 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiAudio;
+import com.vk.sdk.api.model.VkAudioArray;
 
 import org.kirillius.mymusic.fragments.PlaylistFragment;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -40,6 +45,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public static final int NOTIFICATION_ID = 1;
     public static final String TRACK_ID = "TrackId";
+    private static final int ITEMS_COUNT = 30;
 
     private ArrayList<VKApiAudio> mTracks = new ArrayList<>();
     private int mCurrentPosition = 0;
@@ -48,6 +54,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private MediaPlayer mMediaPlayer;
     private PlayerBroadcastReceiver mReceiver;
+
+    private VKRequest mCurrentRequest;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -208,6 +216,13 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if ( mCurrentRequest != null ) {
+            mCurrentRequest.setRequestListener(null);
+            mCurrentRequest.cancel();
+        }
+        mCurrentRequest = null;
+
         unregisterReceiver(mReceiver);
         releaseMediaPlayer();
     }
@@ -271,10 +286,37 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             mMediaPlayer.stop();
         }
 
+        if ( mCurrentPosition >= mTracks.size() / 2 ) {
+            loadMoreTracks();
+        }
+
         playTrack();
         updateNotification();
     }
 
+    /**
+     * Loads more tracks
+     */
+    private void loadMoreTracks() {
+        if ( mTracks.size() == mTotalCount ) {
+            return;
+        }
+
+        if (mCurrentRequest != null) {
+            return;
+        }
+
+        mCurrentRequest = new com.vk.sdk.api.methods.VKApiAudio().get(VKParameters.from(
+                "offset", mTracks.size(),
+                "count", ITEMS_COUNT
+        ));
+
+        mCurrentRequest.executeWithListener(new AudioRequestListener(this));
+    }
+
+    /**
+     * Local broadcast receiver
+     */
     private class PlayerBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -296,6 +338,43 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 PlayerService.this.stopForeground(true);
                 PlayerService.this.stopSelf();
             }
+        }
+    }
+
+    /**
+     * VKRequestListener with weak reference to PlayerService instance
+     */
+    private static class AudioRequestListener extends VKRequest.VKRequestListener {
+
+        private WeakReference<PlayerService> serviceWeakRef;
+
+        public AudioRequestListener(PlayerService service) {
+            serviceWeakRef = new WeakReference<>(service);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+            PlayerService service = serviceWeakRef.get();
+
+            if ( service == null ) {
+                return;
+            }
+
+            if (response.parsedModel instanceof VkAudioArray) {
+                service.mCurrentRequest = null;
+                service.mTracks.addAll( (VkAudioArray)response.parsedModel );
+                Log.d(toString(), "size: " + service.mTracks.size());
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            PlayerService service = serviceWeakRef.get();
+
+            if ( service != null ) {
+                service.mCurrentRequest = null;
+            }
+            Log.e(toString(), "error: " + error.toString());
         }
     }
 }
