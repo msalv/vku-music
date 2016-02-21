@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -94,6 +95,10 @@ public class PlayerService extends Service {
 
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
+
+        if (Build.VERSION.SDK_INT > 15 ) {
+            notification.bigContentView = contentView;
+        }
 
         startForeground(NOTIFICATION_ID, notification);
     }
