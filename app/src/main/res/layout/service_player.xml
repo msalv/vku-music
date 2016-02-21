@@ -55,7 +55,7 @@
             android:layout_weight="1"
             android:layout_height="48dp"
             android:tint="@color/colorTextSmall"
-            android:src="@drawable/ic_play_arrow_black_24dp"/>
+            android:src="@drawable/ic_pause_black_24dp"/>
 
         <ImageView
             android:id="@+id/next"
