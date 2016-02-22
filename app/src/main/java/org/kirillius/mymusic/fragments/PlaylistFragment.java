@@ -33,6 +33,8 @@ import org.kirillius.mymusic.ui.adapters.AdapterFactory;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 import org.kirillius.mymusic.ui.adapters.PlaylistAdapter;
 
+import java.lang.ref.WeakReference;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -167,7 +169,7 @@ public class PlaylistFragment extends VKRequestFragment {
             }
         });
 
-        mReceiver = new PlaylistBroadcastReceiver();
+        mReceiver = new PlaylistBroadcastReceiver(this);
         getActivity().registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
 
         loadTracks();
@@ -320,15 +322,26 @@ public class PlaylistFragment extends VKRequestFragment {
         getActivity().unregisterReceiver(mReceiver);
     }
 
-    private class PlaylistBroadcastReceiver extends BroadcastReceiver {
+    /**
+     * Local broadcast receiver with weak reference to the fragment
+     */
+    private static class PlaylistBroadcastReceiver extends BroadcastReceiver {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public PlaylistBroadcastReceiver(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             int track_id = intent.getIntExtra(PlayerService.TRACK_ID, -1);
 
-            if ( mAdapter != null ) {
-                mAdapter.currentPlayingId = track_id;
-                mAdapter.notifyDataSetChanged();
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if ( fragment != null && fragment.mAdapter != null ) {
+                fragment.mAdapter.currentPlayingId = track_id;
+                fragment.mAdapter.notifyDataSetChanged();
             }
         }
     }
