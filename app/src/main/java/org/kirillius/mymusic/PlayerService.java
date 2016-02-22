@@ -92,7 +92,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public void onCreate() {
         super.onCreate();
-        mReceiver = new PlayerBroadcastReceiver();
+        mReceiver = new PlayerBroadcastReceiver(this);
     }
 
     /**
@@ -315,28 +315,41 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     /**
-     * Local broadcast receiver
+     * Local broadcast receiver with weak reference to PlayerService instance
      */
-    private class PlayerBroadcastReceiver extends BroadcastReceiver {
+    private static class PlayerBroadcastReceiver extends BroadcastReceiver {
+
+        WeakReference<PlayerService> serviceWeakReference;
+
+        public PlayerBroadcastReceiver(PlayerService service) {
+            serviceWeakReference = new WeakReference<>(service);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            PlayerService service = serviceWeakReference.get();
+
+            if ( service == null ) {
+                return;
+            }
+
             String action = intent.getAction();
 
             if ( PlayerService.ACTION_PLAY_PAUSE.equals(action) ) {
-                PlayerService.this.togglePlayer();
-                PlayerService.this.updateNotification();
+                service.togglePlayer();
+                service.updateNotification();
             }
             else if ( PlayerService.ACTION_PREV.equals(action) ) {
-                PlayerService.this.playPrev();
+                service.playPrev();
             }
             else if ( PlayerService.ACTION_NEXT.equals(action) ) {
-                PlayerService.this.playNext();
+                service.playNext();
             }
             else if ( PlayerService.ACTION_CLOSE.equals(action) ) {
-                PlayerService.this.sendPauseBroadcast();
-                PlayerService.this.stopForeground(true);
-                PlayerService.this.stopSelf();
+                service.sendPauseBroadcast();
+                service.stopForeground(true);
+                service.stopSelf();
             }
         }
     }
@@ -373,7 +386,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             if ( service != null ) {
                 service.mCurrentRequest = null;
             }
-            Log.e(toString(), "error: " + error.toString());
+            Log.e(this.toString(), error.toString());
         }
     }
 }
