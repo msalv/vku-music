@@ -181,7 +181,6 @@ public class PlaylistFragment extends VKRequestFragment {
      * Loads list of audio tracks
      */
     protected void loadTracks() {
-
         mCurrentRequest = new VKRequest("execute.getAudio", VKParameters.from(
                 "count", ITEMS_COUNT
         ), VKApiGetAudioResponse.class);
@@ -190,34 +189,13 @@ public class PlaylistFragment extends VKRequestFragment {
         mEmptyView.setVisibility(View.GONE);
         mLoadingView.setVisibility(View.VISIBLE);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mLoadingView.setVisibility(View.GONE);
-
-                if (response.parsedModel instanceof VKApiGetAudioResponse) {
-                    updatePlaylist((VKApiGetAudioResponse) response.parsedModel);
-                } else {
-                    mErrorView.setVisibility(View.VISIBLE);
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mLoadingView.setVisibility(View.GONE);
-                mErrorView.setVisibility(View.VISIBLE);
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new TracksLoadedListener(this));
     }
 
     /**
      * Updates playlist with new tracks
      */
     protected void updatePlaylist(VKApiGetAudioResponse response) {
-
         mCurrentRequest = null;
 
         if (!TextUtils.isEmpty(response.username)) {
@@ -252,28 +230,7 @@ public class PlaylistFragment extends VKRequestFragment {
 
         mAdapter.setIsLoading(true);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mAdapter.setIsLoading(false);
-
-                if (response.parsedModel instanceof VkAudioArray) {
-                    VkAudioArray data = (VkAudioArray) response.parsedModel;
-                    appendTracks(data);
-                } else {
-                    mAdapter.onError();
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mAdapter.setIsLoading(false);
-                mAdapter.onError();
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new MoreTracksLoadedListener(this));
     }
 
     /**
@@ -320,6 +277,97 @@ public class PlaylistFragment extends VKRequestFragment {
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(mReceiver);
+    }
+
+    /**
+     * Request listener with weak reference to the fragment
+     */
+    private static class TracksLoadedListener extends VKRequest.VKRequestListener {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public TracksLoadedListener(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+
+            if (response.parsedModel instanceof VKApiGetAudioResponse) {
+                fragment.updatePlaylist((VKApiGetAudioResponse) response.parsedModel);
+            }
+            else {
+                fragment.mErrorView.setVisibility(View.VISIBLE);
+                fragment.showError(null);
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+            fragment.mErrorView.setVisibility(View.VISIBLE);
+            fragment.showError(error);
+        }
+    }
+
+    /**
+     * Request listener with weak reference to the fragment
+     */
+    private static class MoreTracksLoadedListener extends VKRequest.VKRequestListener {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public MoreTracksLoadedListener(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mAdapter.setIsLoading(false);
+
+            if (response.parsedModel instanceof VkAudioArray) {
+                VkAudioArray data = (VkAudioArray) response.parsedModel;
+                fragment.appendTracks(data);
+            }
+            else {
+                fragment.mAdapter.onError();
+                fragment.showError(null);
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mAdapter.setIsLoading(false);
+            fragment.mAdapter.onError();
+            fragment.showError(error);
+        }
     }
 
     /**
