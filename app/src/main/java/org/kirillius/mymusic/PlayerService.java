@@ -363,7 +363,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             if (response.parsedModel instanceof VkAudioArray) {
                 service.mCurrentRequest = null;
                 service.mTracks.addAll( (VkAudioArray)response.parsedModel );
-                Log.d(toString(), "size: " + service.mTracks.size());
             }
         }
 
