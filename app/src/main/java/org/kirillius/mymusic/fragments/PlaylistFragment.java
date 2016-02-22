@@ -327,7 +327,7 @@ public class PlaylistFragment extends VKRequestFragment {
     /**
      * Request listener with weak reference to the fragment
      */
-    private static class MoreTracksLoadedListener extends VKRequest.VKRequestListener {
+    protected static class MoreTracksLoadedListener extends VKRequest.VKRequestListener {
 
         private WeakReference<PlaylistFragment> fragmentWeakReference;
 

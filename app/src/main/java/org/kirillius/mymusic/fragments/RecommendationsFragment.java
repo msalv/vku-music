@@ -170,27 +170,6 @@ public class RecommendationsFragment extends PlaylistFragment {
 
         mAdapter.setIsLoading(true);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mAdapter.setIsLoading(false);
-
-                if (response.parsedModel instanceof VkAudioArray) {
-                    VkAudioArray data = (VkAudioArray) response.parsedModel;
-                    appendTracks(data);
-                } else {
-                    mAdapter.onError();
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mAdapter.setIsLoading(false);
-                mAdapter.onError();
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new PlaylistFragment.MoreTracksLoadedListener(this));
     }
 }
