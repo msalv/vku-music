@@ -47,18 +47,22 @@ public class RecommendationsFragment extends PlaylistFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
-
         VKApiAudio track = null;
+        String title = null;
 
         if ( getArguments() != null ) {
             track = getArguments().getParcelable(ARG_TRACK);
         }
 
-        this.song_id = new StringBuilder().append(track.owner_id).append("_").append(track.id).toString();
+        if ( track != null ) {
+            this.song_id = new StringBuilder().append(track.owner_id).append("_").append(track.id).toString();
+            title = track.title;
+        }
+
+        View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
         mActionBar.setTitle(R.string.recommendations);
-        mActionBar.setSubtitle(track.title);
+        mActionBar.setSubtitle(title);
         mActionBar.setDisplayHomeAsUpEnabled(true);
 
         mEmptyView.setText(R.string.no_recommendations);
@@ -93,6 +97,8 @@ public class RecommendationsFragment extends PlaylistFragment {
 
         if ( song_id == null ) {
             mEmptyView.setVisibility(View.VISIBLE);
+            mLoadingView.setVisibility(View.GONE);
+            mErrorView.setVisibility(View.GONE);
             return;
         }
 
