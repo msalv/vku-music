@@ -12,6 +12,8 @@ import com.vk.sdk.api.model.VKApiAudio;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.core.DurationFormatter;
 
+import java.util.ArrayList;
+
 /**
  * Created by Kirill on 14.02.2016.
  */
@@ -20,14 +22,24 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
     private StringBuilder mStringBuilder;
 
     private OnItemClickListener onActionButtonClicked;
+    private OnItemClickListener onPlayButtonClicked;
     public int currentItemId = -1;
+    public int currentPlayingId = -1;
 
     public PlaylistAdapter() {
         mStringBuilder = new StringBuilder();
     }
 
+    public ArrayList<VKApiAudio> toArrayList() {
+        return new ArrayList<>(mItems);
+    }
+
     public void setOnActionButtonClicked(OnItemClickListener onActionButtonClicked) {
         this.onActionButtonClicked = onActionButtonClicked;
+    }
+
+    public void setOnPlayButtonClicked(OnItemClickListener onPlayButtonClicked) {
+        this.onPlayButtonClicked = onPlayButtonClicked;
     }
 
     @Override
@@ -38,7 +50,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         switch (viewType) {
             case ITEM_VIEW_TYPE:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.audio_item, parent, false);
-                holder = new ItemHolder(view, this.clickListener, this.onActionButtonClicked);
+                holder = new ItemHolder(view, this.clickListener, this.onActionButtonClicked, this.onPlayButtonClicked);
                 break;
 
             default:
@@ -63,6 +75,13 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
                 vh.buttons_container.setVisibility(View.GONE);
             }
 
+            if ( track.id == currentPlayingId ) {
+                vh.play.setImageResource(R.drawable.ic_pause_black_24dp);
+            }
+            else {
+                vh.play.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+            }
+
             vh.artist.setText(track.artist);
             vh.track.setText(track.title);
 
@@ -80,10 +99,11 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
         public TextView duration;
 
         public View buttons_container;
+        public ImageButton play;
         public ImageButton action;
 
-        public ItemHolder(View itemView, OnItemClickListener clickListener, final OnItemClickListener onAction) {
-            super(itemView, clickListener);
+        public ItemHolder(View itemView, OnItemClickListener... listeners) {
+            super(itemView, (listeners.length > 0) ? listeners[0] : null);
 
             artist = (TextView) itemView.findViewById(R.id.artist);
             track = (TextView) itemView.findViewById(R.id.track);
@@ -93,11 +113,26 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             action = (ImageButton)itemView.findViewById(R.id.action);
 
+            final OnItemClickListener onAction = (listeners.length > 1) ? listeners[1] : null;
+
             if ( onAction != null ) {
                 action.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         onAction.onItemClick(v, getLayoutPosition());
+                    }
+                });
+            }
+
+            play = (ImageButton)itemView.findViewById(R.id.play);
+
+            final OnItemClickListener onPlay = (listeners.length > 2) ? listeners[2] : null;
+
+            if ( onPlay != null ) {
+                play.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onPlay.onItemClick(v, getLayoutPosition());
                     }
                 });
             }
