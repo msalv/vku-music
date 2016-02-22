@@ -52,13 +52,12 @@ public class PlaylistFragment extends VKRequestFragment {
 
     protected final static int ITEMS_COUNT = 30;
 
-    private StringBuilder mStringBuilder;
     private PlaylistBroadcastReceiver mReceiver;
 
     private OnFragmentRequested onFragmentRequested;
 
-    public PlaylistFragment() {
-        mStringBuilder = new StringBuilder();
+    public PlaylistFragment(){
+
     }
 
     @Override
@@ -150,11 +149,7 @@ public class PlaylistFragment extends VKRequestFragment {
                     return;
                 }
 
-                mStringBuilder.setLength(0);
-                mStringBuilder.append(track.owner_id).append("_").append(track.id);
-
-                String song_id = mStringBuilder.toString();
-                RecommendationsFragment f = RecommendationsFragment.createInstance(song_id, track.title);
+                RecommendationsFragment f = RecommendationsFragment.createInstance(track);
                 onFragmentRequested.navigate(f, RecommendationsFragment.TAG);
             }
         });

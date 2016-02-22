@@ -24,17 +24,15 @@ public class RecommendationsFragment extends PlaylistFragment {
 
     public final static String TAG = "RecommendationsFragment";
 
-    public final static String ARG_ID = "ArgId";
-    public final static String ARG_TITLE = "ArgTitle";
+    public final static String ARG_TRACK = "ArgTrack";
 
     private String song_id = null;
 
-    public static RecommendationsFragment createInstance(String song_id, String title) {
+    public static RecommendationsFragment createInstance(com.vk.sdk.api.model.VKApiAudio track) {
         RecommendationsFragment fragment = new RecommendationsFragment();
 
         Bundle args = new Bundle();
-        args.putString(ARG_ID, song_id);
-        args.putString(ARG_TITLE, title);
+        args.putParcelable(ARG_TRACK, track);
 
         fragment.setArguments(args);
 
@@ -49,14 +47,16 @@ public class RecommendationsFragment extends PlaylistFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
-        String title = null;
+        com.vk.sdk.api.model.VKApiAudio track = null;
 
         if ( getArguments() != null ) {
-            title = getArguments().getString(ARG_TITLE);
+            track = getArguments().getParcelable(ARG_TRACK);
         }
 
+        this.song_id = new StringBuilder().append(track.owner_id).append("_").append(track.id).toString();
+
         mActionBar.setTitle(R.string.recommendations);
-        mActionBar.setSubtitle(title);
+        mActionBar.setSubtitle(track.title);
         mActionBar.setDisplayHomeAsUpEnabled(true);
 
         mEmptyView.setText(R.string.no_recommendations);
@@ -106,10 +106,6 @@ public class RecommendationsFragment extends PlaylistFragment {
 
     @Override
     protected void loadTracks() {
-
-        if ( getArguments() != null ) {
-            song_id = getArguments().getString(ARG_ID);
-        }
 
         if ( song_id == null ) {
             mEmptyView.setVisibility(View.VISIBLE);
