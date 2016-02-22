@@ -17,6 +17,8 @@ import com.vk.sdk.api.model.VkAudioArray;
 import org.kirillius.mymusic.R;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by Kirill on 14.02.2016.
  */
@@ -122,27 +124,7 @@ public class RecommendationsFragment extends PlaylistFragment {
         mEmptyView.setVisibility(View.GONE);
         mLoadingView.setVisibility(View.VISIBLE);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mLoadingView.setVisibility(View.GONE);
-
-                if (response.parsedModel instanceof VkAudioArray) {
-                    updatePlaylist((VkAudioArray) response.parsedModel);
-                } else {
-                    mErrorView.setVisibility(View.VISIBLE);
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mLoadingView.setVisibility(View.GONE);
-                mErrorView.setVisibility(View.VISIBLE);
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new RecommendationsLoadedListener(this));
     }
 
     /**
@@ -171,5 +153,49 @@ public class RecommendationsFragment extends PlaylistFragment {
         mAdapter.setIsLoading(true);
 
         mCurrentRequest.executeWithListener(new PlaylistFragment.MoreTracksLoadedListener(this));
+    }
+
+    /**
+     * Get recommendations request listener with weak reference to the fragment
+     */
+    private static class RecommendationsLoadedListener extends VKRequest.VKRequestListener {
+
+        WeakReference<RecommendationsFragment> fragmentWeakReference;
+
+        public RecommendationsLoadedListener(RecommendationsFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+
+            RecommendationsFragment fragment = fragmentWeakReference.get();
+
+            if ( fragment == null ) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+
+            if (response.parsedModel instanceof VkAudioArray) {
+                fragment.updatePlaylist((VkAudioArray) response.parsedModel);
+            } else {
+                fragment.mErrorView.setVisibility(View.VISIBLE);
+                fragment.showError(null);
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            RecommendationsFragment fragment = fragmentWeakReference.get();
+
+            if ( fragment == null ) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+            fragment.mErrorView.setVisibility(View.VISIBLE);
+            fragment.showError(error);
+        }
     }
 }
