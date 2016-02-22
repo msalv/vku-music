@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.vk.sdk.api.model.VkAudioArray;
 import org.kirillius.mymusic.OnFragmentRequested;
 import org.kirillius.mymusic.PlayerService;
 import org.kirillius.mymusic.R;
+import org.kirillius.mymusic.core.AppLoader;
 import org.kirillius.mymusic.ui.ErrorView;
 import org.kirillius.mymusic.ui.adapters.AdapterFactory;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
@@ -170,7 +172,7 @@ public class PlaylistFragment extends VKRequestFragment {
         });
 
         mReceiver = new PlaylistBroadcastReceiver(this);
-        getActivity().registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
+        AppLoader.appContext.registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
 
         loadTracks();
 
@@ -276,7 +278,12 @@ public class PlaylistFragment extends VKRequestFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getActivity().unregisterReceiver(mReceiver);
+        try {
+            AppLoader.appContext.unregisterReceiver(mReceiver);
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
 
     /**
