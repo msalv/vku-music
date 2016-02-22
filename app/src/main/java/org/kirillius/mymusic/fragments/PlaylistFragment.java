@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,10 +29,13 @@ import com.vk.sdk.api.model.VkAudioArray;
 import org.kirillius.mymusic.OnFragmentRequested;
 import org.kirillius.mymusic.PlayerService;
 import org.kirillius.mymusic.R;
+import org.kirillius.mymusic.core.AppLoader;
 import org.kirillius.mymusic.ui.ErrorView;
 import org.kirillius.mymusic.ui.adapters.AdapterFactory;
 import org.kirillius.mymusic.ui.adapters.EndlessScrollAdapter;
 import org.kirillius.mymusic.ui.adapters.PlaylistAdapter;
+
+import java.lang.ref.WeakReference;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,13 +56,12 @@ public class PlaylistFragment extends VKRequestFragment {
 
     protected final static int ITEMS_COUNT = 30;
 
-    private StringBuilder mStringBuilder;
     private PlaylistBroadcastReceiver mReceiver;
 
     private OnFragmentRequested onFragmentRequested;
 
-    public PlaylistFragment() {
-        mStringBuilder = new StringBuilder();
+    public PlaylistFragment(){
+
     }
 
     @Override
@@ -150,11 +153,7 @@ public class PlaylistFragment extends VKRequestFragment {
                     return;
                 }
 
-                mStringBuilder.setLength(0);
-                mStringBuilder.append(track.owner_id).append("_").append(track.id);
-
-                String song_id = mStringBuilder.toString();
-                RecommendationsFragment f = RecommendationsFragment.createInstance(song_id, track.title);
+                RecommendationsFragment f = RecommendationsFragment.createInstance(track);
                 onFragmentRequested.navigate(f, RecommendationsFragment.TAG);
             }
         });
@@ -172,8 +171,8 @@ public class PlaylistFragment extends VKRequestFragment {
             }
         });
 
-        mReceiver = new PlaylistBroadcastReceiver();
-        getActivity().registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
+        mReceiver = new PlaylistBroadcastReceiver(this);
+        AppLoader.appContext.registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
 
         loadTracks();
 
@@ -184,7 +183,6 @@ public class PlaylistFragment extends VKRequestFragment {
      * Loads list of audio tracks
      */
     protected void loadTracks() {
-
         mCurrentRequest = new VKRequest("execute.getAudio", VKParameters.from(
                 "count", ITEMS_COUNT
         ), VKApiGetAudioResponse.class);
@@ -193,34 +191,13 @@ public class PlaylistFragment extends VKRequestFragment {
         mEmptyView.setVisibility(View.GONE);
         mLoadingView.setVisibility(View.VISIBLE);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mLoadingView.setVisibility(View.GONE);
-
-                if (response.parsedModel instanceof VKApiGetAudioResponse) {
-                    updatePlaylist((VKApiGetAudioResponse) response.parsedModel);
-                } else {
-                    mErrorView.setVisibility(View.VISIBLE);
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mLoadingView.setVisibility(View.GONE);
-                mErrorView.setVisibility(View.VISIBLE);
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new TracksLoadedListener(this));
     }
 
     /**
      * Updates playlist with new tracks
      */
     protected void updatePlaylist(VKApiGetAudioResponse response) {
-
         mCurrentRequest = null;
 
         if (!TextUtils.isEmpty(response.username)) {
@@ -255,28 +232,7 @@ public class PlaylistFragment extends VKRequestFragment {
 
         mAdapter.setIsLoading(true);
 
-        mCurrentRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-
-                mAdapter.setIsLoading(false);
-
-                if (response.parsedModel instanceof VkAudioArray) {
-                    VkAudioArray data = (VkAudioArray) response.parsedModel;
-                    appendTracks(data);
-                } else {
-                    mAdapter.onError();
-                    showError(null);
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                mAdapter.setIsLoading(false);
-                mAdapter.onError();
-                showError(error);
-            }
-        });
+        mCurrentRequest.executeWithListener(new MoreTracksLoadedListener(this));
     }
 
     /**
@@ -322,18 +278,125 @@ public class PlaylistFragment extends VKRequestFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getActivity().unregisterReceiver(mReceiver);
+        try {
+            AppLoader.appContext.unregisterReceiver(mReceiver);
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
 
-    private class PlaylistBroadcastReceiver extends BroadcastReceiver {
+    /**
+     * Request listener with weak reference to the fragment
+     */
+    private static class TracksLoadedListener extends VKRequest.VKRequestListener {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public TracksLoadedListener(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+
+            if (response.parsedModel instanceof VKApiGetAudioResponse) {
+                fragment.updatePlaylist((VKApiGetAudioResponse) response.parsedModel);
+            }
+            else {
+                fragment.mErrorView.setVisibility(View.VISIBLE);
+                fragment.showError(null);
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mLoadingView.setVisibility(View.GONE);
+            fragment.mErrorView.setVisibility(View.VISIBLE);
+            fragment.showError(error);
+        }
+    }
+
+    /**
+     * Request listener with weak reference to the fragment
+     */
+    protected static class MoreTracksLoadedListener extends VKRequest.VKRequestListener {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public MoreTracksLoadedListener(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onComplete(VKResponse response) {
+
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mAdapter.setIsLoading(false);
+
+            if (response.parsedModel instanceof VkAudioArray) {
+                VkAudioArray data = (VkAudioArray) response.parsedModel;
+                fragment.appendTracks(data);
+            }
+            else {
+                fragment.mAdapter.onError();
+                fragment.showError(null);
+            }
+        }
+
+        @Override
+        public void onError(VKError error) {
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if (fragment == null) {
+                return;
+            }
+
+            fragment.mAdapter.setIsLoading(false);
+            fragment.mAdapter.onError();
+            fragment.showError(error);
+        }
+    }
+
+    /**
+     * Local broadcast receiver with weak reference to the fragment
+     */
+    private static class PlaylistBroadcastReceiver extends BroadcastReceiver {
+
+        private WeakReference<PlaylistFragment> fragmentWeakReference;
+
+        public PlaylistBroadcastReceiver(PlaylistFragment fragment) {
+            fragmentWeakReference = new WeakReference<>(fragment);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             int track_id = intent.getIntExtra(PlayerService.TRACK_ID, -1);
 
-            if ( mAdapter != null ) {
-                mAdapter.currentPlayingId = track_id;
-                mAdapter.notifyDataSetChanged();
+            PlaylistFragment fragment = fragmentWeakReference.get();
+
+            if ( fragment != null && fragment.mAdapter != null ) {
+                fragment.mAdapter.currentPlayingId = track_id;
+                fragment.mAdapter.notifyDataSetChanged();
             }
         }
     }
