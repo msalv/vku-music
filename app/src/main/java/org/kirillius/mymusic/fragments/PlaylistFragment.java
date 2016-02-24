@@ -135,8 +135,8 @@ public class PlaylistFragment extends VKRequestFragment {
         mAdapter.setOnItemClickListener(new EndlessScrollAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                int prev = mAdapter.currentItemId;
-                mAdapter.currentItemId = (prev == position) ? -1 : position;
+                int prev = mAdapter.currentItemIdx;
+                mAdapter.currentItemIdx = (prev == position) ? -1 : position;
 
                 mAdapter.notifyItemChanged(position);
                 if (prev != -1) {
