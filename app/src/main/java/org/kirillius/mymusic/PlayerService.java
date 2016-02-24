@@ -65,17 +65,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mCurrentPosition = intent.getIntExtra(EXTRA_POSITION, 0);
         mTotalCount = intent.getIntExtra(EXTRA_TOTAL, 0);
 
-        // register broadcast receiver
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        intentFilter.addAction(ACTION_PLAY_PAUSE);
-        intentFilter.addAction(ACTION_PREV);
-        intentFilter.addAction(ACTION_NEXT);
-        intentFilter.addAction(ACTION_CLOSE);
-
-        registerReceiver(mReceiver, intentFilter);
-
         if ( mTracks.get(mCurrentPosition).id != mCurrentTrackId ) {
             playTrack();
         }
@@ -93,6 +82,17 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public void onCreate() {
         super.onCreate();
         mReceiver = new PlayerBroadcastReceiver(this);
+
+        // register broadcast receiver
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        intentFilter.addAction(ACTION_PLAY_PAUSE);
+        intentFilter.addAction(ACTION_PREV);
+        intentFilter.addAction(ACTION_NEXT);
+        intentFilter.addAction(ACTION_CLOSE);
+
+        registerReceiver(mReceiver, intentFilter);
     }
 
     /**
