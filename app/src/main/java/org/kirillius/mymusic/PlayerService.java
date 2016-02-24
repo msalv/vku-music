@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
@@ -23,6 +24,7 @@ import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiAudio;
 import com.vk.sdk.api.model.VkAudioArray;
 
+import org.kirillius.mymusic.core.AppLoader;
 import org.kirillius.mymusic.fragments.PlaylistFragment;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ import java.util.ArrayList;
 /**
  * Created by Kirill on 21.02.2016.
  */
-public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     public static final String EXTRA_TRACKS = "ExtraTracks";
     public static final String EXTRA_POSITION = "ExtraPosition";
@@ -210,6 +212,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.prepareAsync();
 
+        mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnCompletionListener(this);
     }
 
@@ -312,6 +315,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         ));
 
         mCurrentRequest.executeWithListener(new AudioRequestListener(this));
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        Toast.makeText(AppLoader.appContext, R.string.error_audio, Toast.LENGTH_SHORT).show();
+        return false;
     }
 
     /**
