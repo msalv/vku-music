@@ -20,4 +20,5 @@
     <string name="no_recommendations">На эту песню ничто не похоже</string>
     <string name="recommendations">Рекомендации</string>
     <string name="track_saved">Песня сохранена</string>
+    <string name="error_audio">Во время загрузки песни произошла ошибка</string>
 </resources>

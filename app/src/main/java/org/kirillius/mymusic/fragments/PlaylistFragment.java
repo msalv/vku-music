@@ -23,6 +23,7 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.methods.VKApiAudio;
+import com.vk.sdk.api.model.Identifiable;
 import com.vk.sdk.api.model.VKApiGetAudioResponse;
 import com.vk.sdk.api.model.VkAudioArray;
 
@@ -134,8 +135,8 @@ public class PlaylistFragment extends VKRequestFragment {
         mAdapter.setOnItemClickListener(new EndlessScrollAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                int prev = mAdapter.currentItemId;
-                mAdapter.currentItemId = (prev == position) ? -1 : position;
+                int prev = mAdapter.currentItemIdx;
+                mAdapter.currentItemIdx = (prev == position) ? -1 : position;
 
                 mAdapter.notifyItemChanged(position);
                 if (prev != -1) {
@@ -161,6 +162,12 @@ public class PlaylistFragment extends VKRequestFragment {
         mAdapter.setOnPlayButtonClicked(new EndlessScrollAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
+                Identifiable track = mAdapter.getItem(position);
+
+                // show pause icon immediately
+                mAdapter.currentPlayingId = track.getId();
+                mAdapter.notifyDataSetChanged();
+
                 Intent intent = new Intent(getActivity(), PlayerService.class);
 
                 intent.putParcelableArrayListExtra(PlayerService.EXTRA_TRACKS, mAdapter.toArrayList());

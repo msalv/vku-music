@@ -23,7 +23,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
     private OnItemClickListener onActionButtonClicked;
     private OnItemClickListener onPlayButtonClicked;
-    public int currentItemId = -1;
+    public int currentItemIdx = -1;
     public int currentPlayingId = -1;
 
     public PlaylistAdapter() {
@@ -68,7 +68,7 @@ public class PlaylistAdapter extends EndlessScrollAdapter<VKApiAudio> {
 
             VKApiAudio track = getItem(position);
 
-            if ( position == currentItemId ) {
+            if ( position == currentItemIdx) {
                 vh.buttons_container.setVisibility(View.VISIBLE);
             }
             else {
