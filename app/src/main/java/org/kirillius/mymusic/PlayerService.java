@@ -34,7 +34,8 @@ import java.util.ArrayList;
 /**
  * Created by Kirill on 21.02.2016.
  */
-public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
+public class PlayerService extends Service implements MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     public static final String EXTRA_TRACKS = "ExtraTracks";
     public static final String EXTRA_POSITION = "ExtraPosition";
@@ -200,6 +201,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mCurrentTrackId = track.id;
 
         mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnErrorListener(this);
 
         try {
             mMediaPlayer.setDataSource(track.url);
@@ -210,10 +212,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.prepareAsync();
-
-        mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnCompletionListener(this);
+
+        mMediaPlayer.prepareAsync();
     }
 
     @Override
