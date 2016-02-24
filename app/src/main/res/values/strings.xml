@@ -20,4 +20,5 @@
     <string name="no_recommendations">There are no recommendations for you this time</string>
     <string name="recommendations">Recommendations</string>
     <string name="track_saved">Track saved</string>
+    <string name="error_audio">There was an error loading audio file</string>
 </resources>

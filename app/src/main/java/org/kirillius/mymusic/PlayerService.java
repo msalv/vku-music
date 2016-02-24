@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
@@ -23,6 +24,7 @@ import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiAudio;
 import com.vk.sdk.api.model.VkAudioArray;
 
+import org.kirillius.mymusic.core.AppLoader;
 import org.kirillius.mymusic.fragments.PlaylistFragment;
 
 import java.io.IOException;
@@ -32,7 +34,8 @@ import java.util.ArrayList;
 /**
  * Created by Kirill on 21.02.2016.
  */
-public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class PlayerService extends Service implements MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     public static final String EXTRA_TRACKS = "ExtraTracks";
     public static final String EXTRA_POSITION = "ExtraPosition";
@@ -65,17 +68,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mCurrentPosition = intent.getIntExtra(EXTRA_POSITION, 0);
         mTotalCount = intent.getIntExtra(EXTRA_TOTAL, 0);
 
-        // register broadcast receiver
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        intentFilter.addAction(ACTION_PLAY_PAUSE);
-        intentFilter.addAction(ACTION_PREV);
-        intentFilter.addAction(ACTION_NEXT);
-        intentFilter.addAction(ACTION_CLOSE);
-
-        registerReceiver(mReceiver, intentFilter);
-
         if ( mTracks.get(mCurrentPosition).id != mCurrentTrackId ) {
             playTrack();
         }
@@ -93,6 +85,17 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public void onCreate() {
         super.onCreate();
         mReceiver = new PlayerBroadcastReceiver(this);
+
+        // register broadcast receiver
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        intentFilter.addAction(ACTION_PLAY_PAUSE);
+        intentFilter.addAction(ACTION_PREV);
+        intentFilter.addAction(ACTION_NEXT);
+        intentFilter.addAction(ACTION_CLOSE);
+
+        registerReceiver(mReceiver, intentFilter);
     }
 
     /**
@@ -198,6 +201,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mCurrentTrackId = track.id;
 
         mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setOnErrorListener(this);
 
         try {
             mMediaPlayer.setDataSource(track.url);
@@ -208,9 +212,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.prepareAsync();
-
         mMediaPlayer.setOnCompletionListener(this);
+
+        mMediaPlayer.prepareAsync();
     }
 
     @Override
@@ -312,6 +316,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         ));
 
         mCurrentRequest.executeWithListener(new AudioRequestListener(this));
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        Toast.makeText(AppLoader.appContext, R.string.error_audio, Toast.LENGTH_SHORT).show();
+        return false;
     }
 
     /**
